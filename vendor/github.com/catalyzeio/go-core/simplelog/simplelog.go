@@ -1,4 +1,4 @@
-package healthcheckapp
+package simplelog
 
 import (
 	"flag"

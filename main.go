@@ -3,9 +3,11 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/catalyzeio/go-core/simplelog"
 )
 
-var logger = healthcheckapp.NewLogger("healthcheck-app")
+var logger = simplelog.NewLogger("healthcheck-app")
 
 type handler struct{}
 type adminHandler struct{}
