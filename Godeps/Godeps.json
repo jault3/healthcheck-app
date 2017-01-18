@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/catalyzeio/http2-app",
+	"ImportPath": "github.com/catalyzeio/healthcheck-app",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v74",
 	"Deps": [
