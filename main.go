@@ -38,7 +38,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logger.Info("Received request")
 	if healthcheckPassing {
-		w.WriteHeader(204)
+		w.WriteHeader(200)
 	} else {
 		w.WriteHeader(500)
 	}
