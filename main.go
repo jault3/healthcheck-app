@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/catalyzeio/go-core/simplelog"
 )
@@ -38,11 +37,11 @@ func adminServer() {
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logger.Info("Received request")
-	time.Sleep(1 * time.Second)
+	//time.Sleep(1 * time.Second)
 	if healthcheckPassing {
 		w.WriteHeader(200)
 	} else {
-		w.WriteHeader(500)
+		w.WriteHeader(404)
 	}
 	str := "passing"
 	if !healthcheckPassing {
