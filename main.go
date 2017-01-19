@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/catalyzeio/go-core/simplelog"
 )
@@ -41,6 +42,11 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(500)
 	}
+	str := "passing"
+	if !healthcheckPassing {
+		str = "failing"
+	}
+	w.Write([]byte(str + "-" + os.Getenv("CATALYZE_JOB_ID")))
 }
 
 func (h *adminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
