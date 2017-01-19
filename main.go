@@ -38,7 +38,7 @@ func adminServer() {
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logger.Info("Received request")
-	time.Sleep(250 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 	if healthcheckPassing {
 		w.WriteHeader(200)
 	} else {
