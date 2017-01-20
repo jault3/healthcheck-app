@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/catalyzeio/go-core/simplelog"
 )
@@ -13,9 +15,13 @@ var logger = simplelog.NewLogger("healthcheck-app")
 type handler struct{}
 type adminHandler struct{}
 
-var healthcheckPassing = true
+var (
+	healthcheckPassing = true
+	duration           int
+)
 
 func main() {
+	duration, _ = strconv.Atoi(os.Getenv("SLEEP_DURATION"))
 	go adminServer()
 	h := &handler{}
 	srv := &http.Server{
@@ -36,7 +42,7 @@ func adminServer() {
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	//time.Sleep(1 * time.Second)
+	time.Sleep(time.Duration(duration) * time.Second)
 	if healthcheckPassing {
 		w.WriteHeader(200)
 	} else {
