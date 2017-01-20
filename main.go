@@ -36,7 +36,6 @@ func adminServer() {
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logger.Info("Received request")
 	//time.Sleep(1 * time.Second)
 	if healthcheckPassing {
 		w.WriteHeader(200)
@@ -47,6 +46,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !healthcheckPassing {
 		str = "failing"
 	}
+	logger.Info("Received request: %s %s - %s", r.Method, r.RequestURI, str)
 	w.Write([]byte(str + "-" + os.Getenv("CATALYZE_JOB_ID")))
 }
 
@@ -57,7 +57,7 @@ func (h *adminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !healthcheckPassing {
 		str = "failing"
 	}
-	logger.Info("Received admin request: healthcheck is now %s", str)
+	logger.Info("Received admin request: %s %s - healthcheck is now %s", r.Method, r.RequestURI, str)
 	w.WriteHeader(200)
 	w.Write([]byte(str))
 }
