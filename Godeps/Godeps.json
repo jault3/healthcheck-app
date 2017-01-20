@@ -2,10 +2,5 @@
 	"ImportPath": "github.com/catalyzeio/healthcheck-app",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v74",
-	"Deps": [
-		{
-			"ImportPath": "github.com/catalyzeio/go-core/simplelog",
-			"Rev": "1c9069a90e03eb985422970a94cd92286d0bb234"
-		}
-	]
+	"Deps": []
 }

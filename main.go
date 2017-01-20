@@ -6,11 +6,9 @@ import (
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/catalyzeio/go-core/simplelog"
 )
 
-var logger = simplelog.NewLogger("healthcheck-app")
+var logger = log.New(os.Stdout, "healthcheck-app", log.LstdFlags)
 
 type handler struct{}
 type adminHandler struct{}
@@ -52,7 +50,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !healthcheckPassing {
 		str = "failing"
 	}
-	logger.Info("Received request: %s %s - %s", r.Method, r.RequestURI, str)
+	logger.Printf("Received request: %s %s - %s\n", r.Method, r.RequestURI, str)
 	w.Write([]byte(str + "-" + os.Getenv("CATALYZE_JOB_ID")))
 }
 
@@ -63,7 +61,7 @@ func (h *adminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !healthcheckPassing {
 		str = "failing"
 	}
-	logger.Info("Received admin request: %s %s - healthcheck is now %s", r.Method, r.RequestURI, str)
+	logger.Printf("Received admin request: %s %s - healthcheck is now %s\n", r.Method, r.RequestURI, str)
 	w.WriteHeader(200)
 	w.Write([]byte(str))
 }
