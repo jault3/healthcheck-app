@@ -20,8 +20,10 @@ type Settings struct {
 	Healthy       bool `json:"healthy"`
 }
 
-var mutex sync.RWMutex
-var settings *Settings
+var (
+	mutex    sync.RWMutex
+	settings = &Settings{}
+)
 
 func main() {
 	settings.SleepDuration = 0
