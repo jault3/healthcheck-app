@@ -77,6 +77,7 @@ func (s *settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte(err.Error()))
+			return
 		}
 
 		var tempSettings *Settings
@@ -84,6 +85,7 @@ func (s *settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte(err.Error()))
+			return
 		}
 
 		mutex.Lock()
