@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -79,6 +80,8 @@ func (s *settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(err.Error()))
 			return
 		}
+		fmt.Printf("data: %+v\n", data)
+		fmt.Printf("err: %+v\n", err)
 
 		var tempSettings *Settings
 		err = json.Unmarshal(data, tempSettings)
