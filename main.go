@@ -83,8 +83,8 @@ func (s *settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("data: %+v\n", data)
 		fmt.Printf("err: %+v\n", err)
 
-		var tempSettings *Settings
-		err = json.Unmarshal(data, tempSettings)
+		tempSettings := Settings{}
+		err = json.Unmarshal(data, &tempSettings)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte(err.Error()))
