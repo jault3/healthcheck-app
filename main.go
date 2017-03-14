@@ -17,8 +17,9 @@ type settingsHandler struct{}
 type rootHandler struct{}
 
 type Settings struct {
-	SleepDuration int  `json:"sleepDuration"`
-	Healthy       bool `json:"healthy"`
+	SleepDuration int    `json:"sleepDuration"`
+	Healthy       bool   `json:"healthy"`
+	Name          string `json:"name"`
 }
 
 var (
@@ -29,6 +30,7 @@ var (
 func main() {
 	settings.SleepDuration = 0
 	settings.Healthy = true
+	settings.Name = os.Getenv("CATALYZE_JOB_ID")
 	http.Handle("/settings", &settingsHandler{})
 	http.Handle("/", &rootHandler{})
 	srv := &http.Server{
