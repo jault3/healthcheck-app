@@ -15,6 +15,7 @@ var logger = log.New(os.Stdout, "healthcheck-app", log.LstdFlags)
 
 type settingsHandler struct{}
 type rootHandler struct{}
+type helloHandler struct{}
 
 type Settings struct {
 	SleepDuration int    `json:"sleepDuration"`
@@ -33,6 +34,7 @@ func main() {
 	settings.Name = os.Getenv("CATALYZE_JOB_ID")
 	http.Handle("/settings", &settingsHandler{})
 	http.Handle("/", &rootHandler{})
+	http.Handle("/hello", &helloHandler{})
 	srv := &http.Server{
 		Addr: ":" + os.Getenv("PORT"),
 	}
@@ -102,4 +104,12 @@ func (s *settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		w.Write(b)
 	}
+}
+
+func (s *helloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.WriteHeader(200)
+	str := fmt.Sprintf("Hello %s", r.Header.Get("X-Forwarded-For"))
+	logger.Printf("Received request: %s %s - %s\n", r.Method, r.RequestURI, str)
+	w.Write([]byte(str))
 }
