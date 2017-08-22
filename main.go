@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type ByteSize float64
+type ByteSize uint64
 
 const (
 	_           = iota
@@ -25,15 +25,15 @@ const (
 func (b ByteSize) String() string {
 	switch {
 	case b >= TB:
-		return fmt.Sprintf("%.3fTB", b/TB)
+		return fmt.Sprintf("%dTB", b/TB)
 	case b >= GB:
-		return fmt.Sprintf("%.2fGB", b/GB)
+		return fmt.Sprintf("%dGB", b/GB)
 	case b >= MB:
-		return fmt.Sprintf("%.1fMB", b/MB)
+		return fmt.Sprintf("%dMB", b/MB)
 	case b >= KB:
-		return fmt.Sprintf("%.0fKB", b/KB)
+		return fmt.Sprintf("%dKB", b/KB)
 	}
-	return fmt.Sprintf("%.0fB", b)
+	return fmt.Sprintf("%dB", b)
 }
 
 var logger = log.New(os.Stdout, "healthcheck-app", log.LstdFlags)
@@ -144,11 +144,11 @@ func (s *helloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *mountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	res := new(syscall.Statfs_t)
-	err := syscall.Statfs("/data", res)
+	err := syscall.Statfs("/home/nathan", res)
 	if err != nil {
 		w.WriteHeader(500)
 	} else {
 		w.WriteHeader(200)
-		w.Write([]byte(fmt.Sprintf("%s", ByteSize(res.Blocks*uint64(res.Bsize)))))
+		w.Write([]byte(fmt.Sprintf("%s", ByteSize(res.Bavail*uint64(res.Bsize)))))
 	}
 }
