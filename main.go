@@ -8,14 +8,40 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"syscall"
 	"time"
 )
+
+type ByteSize float64
+
+const (
+	_           = iota
+	KB ByteSize = 1 << (10 * iota)
+	MB
+	GB
+	TB
+)
+
+func (b ByteSize) String() string {
+	switch {
+	case b >= TB:
+		return fmt.Sprintf("%.3fTB", b/TB)
+	case b >= GB:
+		return fmt.Sprintf("%.2fGB", b/GB)
+	case b >= MB:
+		return fmt.Sprintf("%.1fMB", b/MB)
+	case b >= KB:
+		return fmt.Sprintf("%.0fKB", b/KB)
+	}
+	return fmt.Sprintf("%.0fB", b)
+}
 
 var logger = log.New(os.Stdout, "healthcheck-app", log.LstdFlags)
 
 type settingsHandler struct{}
 type rootHandler struct{}
 type helloHandler struct{}
+type mountHandler struct{}
 
 type Settings struct {
 	SleepDuration int    `json:"sleepDuration"`
@@ -35,6 +61,7 @@ func main() {
 	http.Handle("/settings", &settingsHandler{})
 	http.Handle("/", &rootHandler{})
 	http.Handle("/hello", &helloHandler{})
+	http.Handle("/mount", &mountHandler{})
 	srv := &http.Server{
 		Addr: ":" + os.Getenv("PORT"),
 	}
@@ -112,4 +139,16 @@ func (s *helloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	str := fmt.Sprintf("Hello %s", r.Header.Get("X-Forwarded-For"))
 	logger.Printf("Received request: %s %s - %s\n", r.Method, r.RequestURI, str)
 	w.Write([]byte(str))
+}
+
+func (s *mountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	res := new(syscall.Statfs_t)
+	err := syscall.Statfs("/data", res)
+	if err != nil {
+		w.WriteHeader(500)
+	} else {
+		w.WriteHeader(200)
+		w.Write([]byte(fmt.Sprintf("%s", ByteSize(res.Blocks*uint64(res.Bsize)))))
+	}
 }
