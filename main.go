@@ -42,6 +42,7 @@ type settingsHandler struct{}
 type rootHandler struct{}
 type helloHandler struct{}
 type mountHandler struct{}
+type hostNameHandler struct{}
 
 type Settings struct {
 	SleepDuration int    `json:"sleepDuration"`
@@ -62,6 +63,7 @@ func main() {
 	http.Handle("/", &rootHandler{})
 	http.Handle("/hello", &helloHandler{})
 	http.Handle("/mount", &mountHandler{})
+	http.Handle("/host-name", &hostNameHandler{})
 	srv := &http.Server{
 		Addr: ":" + os.Getenv("PORT"),
 	}
@@ -144,11 +146,22 @@ func (s *helloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *mountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	res := new(syscall.Statfs_t)
-	err := syscall.Statfs("/data", res)
+	err := syscall.Statfs("/home/nathan", res)
 	if err != nil {
 		w.WriteHeader(500)
 	} else {
 		w.WriteHeader(200)
 		w.Write([]byte(fmt.Sprintf("%s", ByteSize(res.Bavail*uint64(res.Bsize)))))
+	}
+}
+
+func (s *hostNameHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	name, err := os.Hostname()
+	if err != nil {
+		w.WriteHeader(500)
+	} else {
+		w.WriteHeader(200)
+		w.Write([]byte(name))
 	}
 }
