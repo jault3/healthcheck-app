@@ -63,7 +63,7 @@ func main() {
 	http.Handle("/", &rootHandler{})
 	http.Handle("/hello", &helloHandler{})
 	http.Handle("/mount", &mountHandler{})
-	http.Handle("/host-name", &hostNameHandler{})
+	http.Handle("/hostname", &hostNameHandler{})
 	srv := &http.Server{
 		Addr: ":" + os.Getenv("PORT"),
 	}
