@@ -42,6 +42,7 @@ type settingsHandler struct{}
 type rootHandler struct{}
 type helloHandler struct{}
 type mountHandler struct{}
+type mountPermissionsHandler struct{}
 type hostNameHandler struct{}
 
 type Settings struct {
@@ -146,13 +147,40 @@ func (s *helloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *mountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	res := new(syscall.Statfs_t)
-	err := syscall.Statfs("/home/nathan", res)
+	err := syscall.Statfs("/data", res)
 	if err != nil {
 		w.WriteHeader(500)
 	} else {
 		w.WriteHeader(200)
 		w.Write([]byte(fmt.Sprintf("%s", ByteSize(res.Bavail*uint64(res.Bsize)))))
 	}
+}
+
+func (s *mountPermissionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	res := new(syscall.Stat_t)
+	err := syscall.Stat("/data", res)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	if res.Uid != 0 {
+		w.WriteHeader(500)
+		w.Write([]byte("Test user was not root"))
+	}
+	pathToTmpFile := "/data/test.txt"
+	_, err = os.Create(pathToTmpFile)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	}
+	err = os.Remove(pathToTmpFile)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	}
+	w.WriteHeader(204)
 }
 
 func (s *hostNameHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
