@@ -167,10 +167,19 @@ func (s *mountPermissionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	}
 	if res.Uid != 0 {
 		w.WriteHeader(500)
-		w.Write([]byte("Test user was not root"))
+		w.Write([]byte("Uid was not root"))
+	}
+	if res.Gid != 0 {
+		w.WriteHeader(500)
+		w.Write([]byte("Gid was not root"))
 	}
 	pathToTmpFile := "/data/test.txt"
-	_, err = os.Create(pathToTmpFile)
+	newFile, err := os.Create(pathToTmpFile)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	}
+	_, err = newFile.WriteString("nailed it")
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte(err.Error()))
