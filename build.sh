@@ -36,3 +36,4 @@ docker build -t datica/$name:release .
 
 echo "Cleaning up:"
 rm -rf ./lib
+rm $name
