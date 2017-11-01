@@ -32,7 +32,7 @@ ldd $name | while read -r line; do
 done
 
 echo "Building docker image:"
-docker build -t daticahealth/$name:release .
+docker build -t datica/$name:release .
 
 echo "Cleaning up:"
 rm -rf ./lib
