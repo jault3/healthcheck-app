@@ -1,0 +1,12 @@
+{
+    "checks": {
+	"custom_ping": {
+	    "command": "/etc/sensu/plugins/customcheck.py",
+	    "subscribers": [
+		"container-1"
+	    ],
+	    "interval": 60,
+	    "standalone": true
+	}
+    }
+}

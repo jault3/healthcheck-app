@@ -44,6 +44,7 @@ type helloHandler struct{}
 type mountHandler struct{}
 type mountPermissionsHandler struct{}
 type hostNameHandler struct{}
+type pingHandler struct{}
 
 type Settings struct {
 	SleepDuration int    `json:"sleepDuration"`
@@ -66,6 +67,7 @@ func main() {
 	http.Handle("/mount", &mountHandler{})
 	http.Handle("/mountPermissions", &mountPermissionsHandler{})
 	http.Handle("/hostname", &hostNameHandler{})
+	http.Handle("/ping", &pingHandler{})
 	srv := &http.Server{
 		Addr: ":" + os.Getenv("PORT"),
 	}
@@ -149,6 +151,7 @@ func (s *mountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	res := new(syscall.Statfs_t)
 	err := syscall.Statfs("/data", res)
+	logger.Printf("Received request: %s %s\n", r.Method, r.RequestURI)
 	if err != nil {
 		w.WriteHeader(500)
 	} else {
@@ -161,6 +164,7 @@ func (s *mountPermissionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	defer r.Body.Close()
 	res := new(syscall.Stat_t)
 	err := syscall.Stat("/data", res)
+	logger.Printf("Received request: %s %s\n", r.Method, r.RequestURI)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte(err.Error()))
@@ -196,10 +200,23 @@ func (s *mountPermissionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 func (s *hostNameHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	name, err := os.Hostname()
+	logger.Printf("Received request: %s %s - %s\n", r.Method, r.RequestURI, name)
 	if err != nil {
 		w.WriteHeader(500)
 	} else {
 		w.WriteHeader(200)
 		w.Write([]byte(name))
+	}
+}
+
+func (s *pingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logger.Printf("Received request: %s %s\n", r.Method, r.RequestURI)
+	f, err := os.Open("/out")
+	if err != nil {
+		w.WriteHeader(200)
+	} else {
+		defer f.Close()
+		w.WriteHeader(503)
 	}
 }
