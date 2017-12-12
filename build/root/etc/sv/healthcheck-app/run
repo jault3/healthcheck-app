@@ -1,3 +1,4 @@
+#! /bin/bash -e
 # this is to log stderr and stdout together
 exec 2>&1
 USER=nobody
