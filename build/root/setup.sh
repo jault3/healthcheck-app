@@ -1,8 +1,5 @@
 #! /bin/bash
 
-# add app user, cf /etc/sv/run
-echo "nobody:x:1:1:nobody:/:/bin/sh" >> /etc/passwd
-echo "nobody:x:1:" >> /etc/group
 # BE CAREFUL!
 # "noninteractive", means that whatever distro commands
 # you run will say yes to defaults.

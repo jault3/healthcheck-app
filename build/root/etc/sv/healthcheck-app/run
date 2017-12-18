@@ -1,12 +1,11 @@
 #! /bin/bash -e
 # this is to log stderr and stdout together
 exec 2>&1
-USER=nobody
+
 # Do a bunch of stuff to initialize your application.
 # HOWEVER, remember that this script will run again if your
 # app goes down so make sure to put in checks so
 # you don't redo anything you only want done once
 
 # run your application
-exec chpst -u ${USER} \
-     /bin/healthcheckapp
+exec /bin/healthcheckapp
