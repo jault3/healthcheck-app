@@ -1,4 +1,4 @@
-FROM registry-sbox05.datica.com/base:latest
+FROM registry.datica.com/base:latest
 
 MAINTAINER Nate Sweet <nathanjsweet@gmail.com>
 
