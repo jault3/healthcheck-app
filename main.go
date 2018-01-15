@@ -8,14 +8,43 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"syscall"
 	"time"
 )
+
+type ByteSize uint64
+
+const (
+	_           = iota
+	KB ByteSize = 1 << (10 * iota)
+	MB
+	GB
+	TB
+)
+
+func (b ByteSize) String() string {
+	switch {
+	case b >= TB:
+		return fmt.Sprintf("%dTB", b/TB)
+	case b >= GB:
+		return fmt.Sprintf("%dGB", b/GB)
+	case b >= MB:
+		return fmt.Sprintf("%dMB", b/MB)
+	case b >= KB:
+		return fmt.Sprintf("%dKB", b/KB)
+	}
+	return fmt.Sprintf("%dB", b)
+}
 
 var logger = log.New(os.Stdout, "healthcheck-app", log.LstdFlags)
 
 type settingsHandler struct{}
 type rootHandler struct{}
 type helloHandler struct{}
+type mountHandler struct{}
+type mountPermissionsHandler struct{}
+type hostNameHandler struct{}
+type pingHandler struct{}
 
 type Settings struct {
 	SleepDuration int    `json:"sleepDuration"`
@@ -35,6 +64,10 @@ func main() {
 	http.Handle("/settings", &settingsHandler{})
 	http.Handle("/", &rootHandler{})
 	http.Handle("/hello", &helloHandler{})
+	http.Handle("/mount", &mountHandler{})
+	http.Handle("/mountPermissions", &mountPermissionsHandler{})
+	http.Handle("/hostname", &hostNameHandler{})
+	http.Handle("/ping", &pingHandler{})
 	srv := &http.Server{
 		Addr: ":" + os.Getenv("PORT"),
 	}
@@ -112,4 +145,78 @@ func (s *helloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	str := fmt.Sprintf("Hello %s", r.Header.Get("X-Forwarded-For"))
 	logger.Printf("Received request: %s %s - %s\n", r.Method, r.RequestURI, str)
 	w.Write([]byte(str))
+}
+
+func (s *mountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	res := new(syscall.Statfs_t)
+	err := syscall.Statfs("/data", res)
+	logger.Printf("Received request: %s %s\n", r.Method, r.RequestURI)
+	if err != nil {
+		w.WriteHeader(500)
+	} else {
+		w.WriteHeader(200)
+		w.Write([]byte(fmt.Sprintf("%s", ByteSize(res.Bavail*uint64(res.Bsize)))))
+	}
+}
+
+func (s *mountPermissionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	res := new(syscall.Stat_t)
+	err := syscall.Stat("/data", res)
+	logger.Printf("Received request: %s %s\n", r.Method, r.RequestURI)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	if res.Uid != 0 {
+		w.WriteHeader(500)
+		w.Write([]byte("Uid was not root"))
+	}
+	if res.Gid != 0 {
+		w.WriteHeader(500)
+		w.Write([]byte("Gid was not root"))
+	}
+	pathToTmpFile := "/data/test.txt"
+	newFile, err := os.Create(pathToTmpFile)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	}
+	_, err = newFile.WriteString("nailed it")
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	}
+	err = os.Remove(pathToTmpFile)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	}
+	w.WriteHeader(204)
+}
+
+func (s *hostNameHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	name, err := os.Hostname()
+	logger.Printf("Received request: %s %s - %s\n", r.Method, r.RequestURI, name)
+	if err != nil {
+		w.WriteHeader(500)
+	} else {
+		w.WriteHeader(200)
+		w.Write([]byte(name))
+	}
+}
+
+func (s *pingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logger.Printf("Received request: %s %s\n", r.Method, r.RequestURI)
+	f, err := os.Open("/out")
+	if err != nil {
+		w.WriteHeader(200)
+	} else {
+		defer f.Close()
+		w.WriteHeader(503)
+	}
 }

@@ -1,0 +1,14 @@
+#!/bin/sh -e
+exec 2>&1
+
+LOGDIR="/data/log/container/healthcheckapp"
+LOGUSER=syslog
+
+if [ ! -e "${LOGDIR}" ]; then
+    mkdir -p "${LOGDIR}"
+    chmod 700 "${LOGDIR}"
+    chown -R ${LOGUSER}:${LOGUSER} "${LOGDIR}"
+fi
+# you can add options to svlogd below, cf man svlogd
+exec chpst -u ${LOGUSER} \
+     svlogd "${LOGDIR}"

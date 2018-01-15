@@ -2,11 +2,9 @@
 .idea
 *.pyc
 *.egg-info
-build
 *.deb
 .goxc.local.json
 builds/
-build/
 public/
 regwatch/
 heartbeat
